@@ -7,7 +7,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.rst')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.rst')).read()
 
-version = "1.0-alpha.1"
+version = "1.0rc1"
 
 entry_point = 'buildout.sendpickedversions:install'
 entry_points = {"zc.buildout.extension": ["default = %s" % entry_point]}
@@ -32,7 +32,7 @@ setup(name='buildout.sendpickedversions',
       keywords='buildout extension send picked versions',
       author='Jukka Ojaniemi',
       author_email='jukka.ojaniemi@jyu.fi',
-      url='http://github.com/collective/buildout.sendpickedversions',
+      url='http://github.com/pingviini/buildout.sendpickedversions',
       packages=find_packages('src'),
       package_dir={'': 'src'},
       namespace_packages=['buildout'],

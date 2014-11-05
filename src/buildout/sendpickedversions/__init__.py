@@ -58,12 +58,21 @@ class BuildoutInfo(object):
                 self.pick_package_info(dists, ws)
                 return dists
             get_dist = get_dist_1
-        else:
+        elif (int(buildout_version[0]) < 3
+              and int(buildout_version[2]) < 3
+              and int(buildout_version[4]) < 5):
             def get_dist_2(self, requirement, ws):
                 dists = original_get_dist(self, requirement, ws)
                 self.pick_package_info(dists, ws)
                 return dists
             get_dist = get_dist_2
+        else:
+            def get_dist_225(self, requirement, ws, for_buildout_run=False):
+                dists = original_get_dist(self, requirement, ws,
+                                          for_buildout_run)
+                self.pick_package_info(dists, ws)
+                return dists
+            get_dist = get_dist_225
 
         return get_dist
 

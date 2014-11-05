@@ -1,6 +1,12 @@
 Changelog
 =========
 
+1.0rc1 (xxxx-xx-xx)
+-------------------
+
+- Add support for zc.buildout >= 2.2.5
+  [datakurre]
+
 1.0-alpha.1 (2013-03-20)
 ------------------------
 
