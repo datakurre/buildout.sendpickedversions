@@ -1,17 +1,17 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function
 import datetime
 import logging
-import urllib2
-import urllib
-import zc.buildout.easy_install
 import pkg_resources
+import requests
 import socket
+import zc.buildout.easy_install
 
-from zc.buildout.buildout import MissingOption
 from buildout.sendpickedversions.wrappers import DistributionWrapper
-# from pprint import pprint
+from zc.buildout.buildout import MissingOption
+
 try:
     import json
-    json
 except ImportError:
     import simplejson as json
 
@@ -21,15 +21,16 @@ buildout_version = pkg_resources.get_distribution('zc.buildout').version
 
 
 def install(buildout):
+    """Monkeypatch buildout to collect and send buildout data"""
+    info = BuildoutInfo(buildout)
 
-    buildoutinfo = BuildoutInfo(buildout)
-    zc.buildout.easy_install.Installer.pick_package_info =\
-        buildoutinfo.pick_package_info
-    zc.buildout.easy_install.Installer._get_dist =\
-        buildoutinfo.enable_sending_picked_versions(
-            zc.buildout.easy_install.Installer._get_dist)
+    pick_package_info = info.pick_package_info
+    _get_dist = info.enable_sending_picked_versions(zc.buildout.easy_install.Installer._get_dist)  # noqa
+    shutdown = info.send_picked_versions(logging.shutdown)
 
-    logging.shutdown = buildoutinfo.send_picked_versions(logging.shutdown)
+    zc.buildout.easy_install.Installer.pick_package_info = pick_package_info
+    zc.buildout.easy_install.Installer._get_dist = _get_dist
+    logging.shutdown = shutdown
 
 
 class BuildoutInfo(object):
@@ -53,24 +54,25 @@ class BuildoutInfo(object):
         """
         # Check if we have zc.buildout < 2.x
         if int(buildout_version[0]) < 2:
-            def get_dist_1(self, requirement, ws, always_unzip):
-                dists = original_get_dist(self, requirement, ws, always_unzip)
-                self.pick_package_info(dists, ws)
+            def get_dist_1(self_, requirement, ws, always_unzip):
+                dists = original_get_dist(self_, requirement, ws, always_unzip)
+                self_.pick_package_info(dists, ws)
                 return dists
             get_dist = get_dist_1
         elif (int(buildout_version[0]) < 3
-              and int(buildout_version[2]) < 3
-              and int(buildout_version[4]) < 5):
-            def get_dist_2(self, requirement, ws):
-                dists = original_get_dist(self, requirement, ws)
-                self.pick_package_info(dists, ws)
+              and (int(buildout_version[2]) < 3
+                   and int(buildout_version[4]) < 5)
+              or int(buildout_version[2]) >= 9):
+            def get_dist_2(self_, requirement, ws):
+                dists = original_get_dist(self_, requirement, ws)
+                self_.pick_package_info(dists, ws)
                 return dists
             get_dist = get_dist_2
         else:
-            def get_dist_225(self, requirement, ws, for_buildout_run=False):
-                dists = original_get_dist(self, requirement, ws,
+            def get_dist_225(self_, requirement, ws, for_buildout_run=False):
+                dists = original_get_dist(self_, requirement, ws,
                                           for_buildout_run)
-                self.pick_package_info(dists, ws)
+                self_.pick_package_info(dists, ws)
                 return dists
             get_dist = get_dist_225
 
@@ -125,11 +127,18 @@ class BuildoutInfo(object):
             data['ipv4'] = self.ipv4
             data['pinned_versions'] = self.pinned_versions
 
-            res = self.send_data(json.dumps(data))
-            if res:
-                print res
+            if self.data_url:
+                if self.data_url.startswith('file://'):
+                    res = self.write_data(data)
+                else:
+                    res = self.send_data(data)
             else:
-                print "Got error sending the data to %s" % self.data_url
+                res = json.dumps(data)
+
+            if res:
+                print(res)
+            else:
+                print('Got error sending the data to %s' % self.data_url)
 
             old_logging_shutdown()
         return logging_shutdown
@@ -145,10 +154,10 @@ class BuildoutInfo(object):
             try:
                 url = self.buildout['whiskers-url']
             except MissingOption:
-                logging.info("No send-data-url specified.")
+                logging.info('No send-data-url specified.')
                 pass
 
-        if url and url[-1] != '/':
+        if url and not url.startswith('file://') and url[-1] != '/':
             url += '/'
 
         return url
@@ -156,19 +165,26 @@ class BuildoutInfo(object):
     def send_data(self, data):
         """Send buildout data to remote URL."""
 
-        logging.info("Sending data to remote url (%s)" % self.data_url)
-
-        req = urllib2.Request(
-            url=self.data_url,
-            data=urllib.urlencode({'data': data}))
+        logging.info('Sending data to remote url (%s)' % self.data_url)
 
         try:
-            res = urllib2.urlopen(req, timeout=30)
-        except TypeError, e:
-            # python2.4 doesn't support timeout
-            res = urllib2.urlopen(req)
-        except urllib2.URLError, e:
-            print str(e)
+            res = requests.post(self.data_url, json=data, timeout=60)
+        except Exception as e:
+            print(str(e))
             return None
 
-        return res.read() or None
+        return res.content or None
+
+    def write_data(self, data):
+        """Write buildout data to local file."""
+
+        logging.info('Writing data to file (%s)' % self.data_url)
+
+        try:
+            with open(self.data_url[len('file://'):], 'w') as fp:
+                fp.write(json.dumps(data, indent=4))
+        except IOError as e:
+            print(str(e))
+            return None
+
+        return self.data_url[len('file://')]

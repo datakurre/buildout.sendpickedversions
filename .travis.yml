@@ -1,0 +1,16 @@
+language: nix
+script: make test coverage
+cache: eggs
+env:
+- PYTHON=python2 BUILDOUT=buildout171
+- PYTHON=python2 BUILDOUT=buildout201
+- PYTHON=python2 BUILDOUT=buildout225
+- PYTHON=python2 BUILDOUT=buildout231
+- PYTHON=python2 BUILDOUT=buildout253
+- PYTHON=python2 BUILDOUT=buildout292
+- PYTHON=python3 BUILDOUT=buildout201
+- PYTHON=python3 BUILDOUT=buildout225
+- PYTHON=python3 BUILDOUT=buildout231
+- PYTHON=python3 BUILDOUT=buildout253
+- PYTHON=python3 BUILDOUT=buildout292
+after_success: make coveralls

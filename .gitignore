@@ -1,9 +1,10 @@
-*.pyc
 *.egg-info
-*.egg
-build
-dist
-bin
-parts
-develop-eggs
+*.mo
+*.pyc
 .installed.cfg
+.cache
+.coverage
+.eggs/
+.idea/
+bin/
+result

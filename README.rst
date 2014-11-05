@@ -1,6 +1,15 @@
 buildout.sendpickedversions
 ===========================
 
+.. image:: https://secure.travis-ci.org/datakurre/buildout.sendpickedversions.png
+   :target: http://travis-ci.org/datakurre/buildout.sendpickedversions
+
+.. image:: https://coveralls.io/repos/github/datakurre/buildout.sendpickedversions/badge.svg?branch=master
+   :target: https://coveralls.io/github/datakurre/buildout.sendpickedversions?branch=master
+
+.. image:: https://badge.fury.io/py/buildout.sendpickedversions.svg
+   :target: https://badge.fury.io/py/buildout.sendpickedversions
+
 This package is heavily inspired by buildout.dumppickedversions_ and its purpose
 is to gather the buildout information and send it as json data to a specified
 remote server.
@@ -8,6 +17,7 @@ remote server.
 Remote server can be anything that can handle json data, but there is already
 working server for that - Whiskers_. Whiskers is developed hand in hand
 with buildout.sendpickedversions to store and display the data.
+
 
 Configuration
 -------------
@@ -25,7 +35,9 @@ buildoutname
 send-data-url
     This is the url where data is sent after buildout has been run. If you
     leave this empty or don't set at all buildout.sendpickedversions just
-    displays the data dict. In earlier versions of buildout.sendpickedversions
+    displays the data dict. If this is a writable local filepath,
+    buildout.sendpickedversions saves the data as file.
+    In earlier versions of buildout.sendpickedversions
     this setting was called `whiskers-url` - this works until next major
     version (2.x).
 

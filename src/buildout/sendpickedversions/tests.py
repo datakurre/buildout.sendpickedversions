@@ -1,30 +1,34 @@
+# -*- coding: utf-8 -*-
 """
 Generic Test case
 """
-__docformat__ = 'restructuredtext'
-
 import os
 import sys
 import re
 import unittest
 import doctest
 import zc.buildout.testing
+import pkg_resources
 from zope.testing import renormalizing
 
-current_dir = os.path.abspath(os.path.dirname(__file__))
+normalize_version1 = (re.compile('= [0-9a-zA-Z -_]+([.][0-9a-zA-Z-_]+)+'), '= N.N')  # noqa
+normalize_version2 = (re.compile('(#[^ ]*?) [0-9a-zA-Z -_]+([.][0-9a-zA-Z-_]+)+'), '\\1 N.N')  # noqa
 
-normalize_version1 = (re.compile('= [0-9a-zA-Z -_]+([.][0-9a-zA-Z-_]+)+'), '= N.N')
-normalize_version2 = (re.compile('(#[^ ]*?) [0-9a-zA-Z -_]+([.][0-9a-zA-Z-_]+)+'), '\\1 N.N')
 
-def doc_suite(test_dir, setUp=zc.buildout.testing.buildoutSetUp, tearDown=zc.buildout.testing.buildoutTearDown, globs=None):
-    """Returns a test suite, based on doctests found in /doctest."""
-    suite = []
-    if globs is None:
-        globs = globals()
+def test_suite():
+    globs = globals()
+
+    cwd = os.getcwd()
+    dist = pkg_resources.get_distribution('buildout.sendpickedversions')
+    os.environ['PYTHONPATH'] = '{}:{}'.format(
+        os.environ.get('PYTHONPATH') or (dist and dist.location or cwd),
+        (dist and dist.location or cwd)
+    )
 
     flags = (doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE |
              doctest.REPORT_ONLY_FIRST_FAILURE)
 
+    test_dir = os.path.abspath(os.path.dirname(__file__))
     package_dir = os.path.split(test_dir)[0]
     if package_dir not in sys.path:
         sys.path.append(package_dir)
@@ -35,18 +39,20 @@ def doc_suite(test_dir, setUp=zc.buildout.testing.buildoutSetUp, tearDown=zc.bui
     docs = [os.path.join(doctest_dir, doc) for doc in
             os.listdir(doctest_dir) if doc.endswith('.txt')]
 
+    suite = []
     for test in docs:
-        suite.append(doctest.DocFileSuite(test, optionflags=flags, 
-                                          globs=globs, setUp=setUp, 
-                                          tearDown=tearDown,
-                                          checker=renormalizing.RENormalizing([normalize_version1, normalize_version2]),
-                                          module_relative=False))
+        suite.append(doctest.DocFileSuite(
+            test, optionflags=flags,
+            globs=globs,
+            setUp=zc.buildout.testing.buildoutSetUp,
+            tearDown=zc.buildout.testing.buildoutTearDown,
+            checker=renormalizing.RENormalizing([normalize_version1,
+                                                 normalize_version2]),
+            module_relative=False
+        ))
 
     return unittest.TestSuite(suite)
 
-def test_suite():
-    """returns the test suite"""
-    return doc_suite(current_dir)
 
 if __name__ == '__main__':
     unittest.main(defaultTest='test_suite')
