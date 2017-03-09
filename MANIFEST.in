@@ -1,4 +1,4 @@
 graft src
-include *.rst
-exclude *.cfg
-global-exclude *.pyc
+include VERSION *.rst *.nix
+exclude Makefile *.cfg
+global-exclude *.pyc .coveragerc
