@@ -1,11 +1,19 @@
 Changelog
 =========
 
-1.0rc1 (xxxx-xx-xx)
+1.0rc2 (xxxx-xx-xx)
 -------------------
 
 - Add support for zc.buildout >= 2.2.5
   [datakurre]
+
+- Add support for saving output to file with file:// -starting URL as
+  *build-data-url*
+  [datakurre]
+
+- Change to use reuquests for posting to *build-data-url*
+  [datakurre]
+
 
 1.0-alpha.1 (2013-03-20)
 ------------------------
