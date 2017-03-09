@@ -1,7 +1,7 @@
 Changelog
 =========
 
-1.0.0rc3 (unreleased)
+1.0.0rc3 (2017-03-09)
 ---------------------
 
 - Fix to retry send_data for a few times on failure
