@@ -17,12 +17,10 @@ normalize_version2 = (re.compile('(#[^ ]*?) [0-9a-zA-Z -_]+([.][0-9a-zA-Z-_]+)+'
 
 def test_suite():
     globs = globals()
-
-    cwd = os.getcwd()
     dist = pkg_resources.get_distribution('buildout.sendpickedversions')
     os.environ['PYTHONPATH'] = '{}:{}'.format(
-        os.environ.get('PYTHONPATH') or (dist and dist.location or cwd),
-        (dist and dist.location or cwd)
+        os.environ.get('PYTHONPATH') or dist.location,
+        dist.location
     )
 
     flags = (doctest.ELLIPSIS | doctest.NORMALIZE_WHITESPACE |
