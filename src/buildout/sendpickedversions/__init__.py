@@ -168,7 +168,8 @@ class BuildoutInfo(object):
         logging.info('Sending data to remote url (%s)' % self.data_url)
 
         try:
-            res = requests.post(self.data_url, json=data, timeout=60)
+            data = {'data': json.dumps(data)}
+            res = requests.post(self.data_url, data=data, timeout=60)
         except Exception as e:
             print(str(e))
             return None
