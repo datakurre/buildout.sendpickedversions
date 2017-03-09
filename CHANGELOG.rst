@@ -4,7 +4,10 @@ Changelog
 1.0.0rc3 (unreleased)
 ---------------------
 
-- Fix data format for push
+- Fix to retry send_data for a few times on failure
+  [datakurre]
+
+- Fix regression in data format for push
   [datakurre]
 
 
