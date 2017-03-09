@@ -10,7 +10,7 @@ all: test
 buildEnv: result/bin/$(PYTHON)
 
 coverage: .coverage
-	nix-shell --run "coverage report --fail-under=80"
+	nix-shell --run "coverage report --fail-under=70"
 
 coveralls: .coverage
 	nix-shell --run coveralls
