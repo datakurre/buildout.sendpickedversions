@@ -4,7 +4,8 @@ Changelog
 1.0.0rc3 (unreleased)
 ---------------------
 
-- Nothing changed yet.
+- Fix data format for push
+  [datakurre]
 
 
 1.0.0rc2 (2017-03-09)
@@ -31,15 +32,18 @@ Changelog
 - Picks buildout name from directory name - no need to specify buildoutname
   to buildout config anymore (though you still can if you want to).
 
+
 0.3 (2012-10-11)
 ----------------
 
 - Performance optimizations (ported from zc.buildout).
 
+
 0.2 (2011-10-16)
 ----------------
 
 - Sends data urlencoded.
+
 
 0.1 (2011-10-16)
 ----------------
