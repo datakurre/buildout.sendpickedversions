@@ -162,19 +162,25 @@ class BuildoutInfo(object):
 
         return url
 
-    def send_data(self, data):
+    def send_data(self, data, times=3):
         """Send buildout data to remote URL."""
 
         logging.info('Sending data to remote url (%s)' % self.data_url)
 
-        try:
-            data = {'data': json.dumps(data)}
-            res = requests.post(self.data_url, data=data, timeout=60)
-        except Exception as e:
-            print(str(e))
-            return None
+        res = None
+        while times > 0:
+            times = times - 1
+            try:
+                data = {'data': json.dumps(data)}
+                res = requests.post(self.data_url, data=data, timeout=60)
+                break
+            except Exception as e:
+                print(str(e))
 
-        return res.content or None
+        if res is not None:
+            return res.content
+        else:
+            return None
 
     def write_data(self, data):
         """Write buildout data to local file."""
